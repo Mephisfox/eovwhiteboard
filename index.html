@@ -6,6 +6,7 @@
     <title>异象回声角色白板</title>
     <style>
         :root {
+            /* --- 日间模式 (默认) --- */
             --bg-color: #e0e0e0;
             --grid-color: #d1d1d1;
             --toolbar-bg: #f5f5f5;
@@ -16,21 +17,47 @@
             --global-opacity: 0.1;
             --grid-size: 40px;
 
+            /* 象限默认设置 */
             --tl-size: 35%; --tl-blur: 15%; --tl-fs: 64px;
             --tr-size: 35%; --tr-blur: 15%; --tr-fs: 64px;
             --bl-size: 35%; --bl-blur: 15%; --bl-fs: 64px;
             --br-size: 35%; --br-blur: 15%; --br-fs: 64px;
         }
 
+        /* --- 夜间模式 (Dark Mode) --- */
+        body.dark-mode {
+            --bg-color: #1a1a1a;
+            --grid-color: #333333;
+            --toolbar-bg: #252525;
+            --dock-bg: #111111;
+            color: #eee;
+        }
+        
+        body.dark-mode .btn { background: #333; color: #ccc; border-color: #555; }
+        body.dark-mode .btn:hover { background: #444; color: #fff; }
+        /* 已删除 body.dark-mode .btn.active 的变蓝效果 */
+
+        body.dark-mode #settings-panel { background: rgba(30, 30, 30, 0.98); border-color: #444; color: #eee; }
+        body.dark-mode .control-title { color: #aaa; }
+        body.dark-mode .slider-row { color: #888; }
+        body.dark-mode .slider-row input[type=number] { background: #222; color: #eee; border-color: #555; }
+        body.dark-mode .input-row input[type=text] { background: #222; color: #eee; border-color: #555; }
+        
+        body.dark-mode .axis-label { background: #444; border-color: #666; color: #eee; }
+        body.dark-mode .item-name { background: rgba(0,0,0,0.6); color: #ccc; }
+        
+        body.dark-mode .floating-textbox { background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.2); }
+        body.dark-mode .editable-content { color: #aaccff; }
+        body.dark-mode .editable-content:empty:before { color: rgba(170, 204, 255, 0.5); }
+
+        /* --- 通用样式 --- */
         body { margin: 0; padding: 0; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; display: flex; flex-direction: column; height: 100vh; background: var(--bg-color); color: #333; overflow: hidden; }
 
-        /* --- 1. 顶部工具栏 --- */
         #toolbar { height: 50px; padding: 0 20px; background: var(--toolbar-bg); display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #ccc; z-index: 2000; }
-        .btn { padding: 6px 14px; cursor: pointer; background: #fff; border: 1px solid #bbb; color: #333; border-radius: 4px; font-size: 13px; display: flex; align-items: center; gap: 5px; user-select: none; }
+        .btn { padding: 6px 14px; cursor: pointer; background: #fff; border: 1px solid #bbb; color: #333; border-radius: 4px; font-size: 13px; display: flex; align-items: center; gap: 5px; user-select: none; transition: background 0.2s; }
         .btn:hover { background: #f0f0f0; }
-        .btn.active { background: #007bff; color: white; border-color: #0056b3; }
+        /* 已删除 .btn.active 的变蓝效果 */
 
-        /* --- 背景设置面板 --- */
         #settings-panel {
             position: absolute; top: 60px; left: 20px; width: 340px; max-height: 80vh; overflow-y: auto;
             background: rgba(255, 255, 255, 0.98); border: 1px solid #ccc; border-radius: 8px;
@@ -47,7 +74,6 @@
         .input-row { display: flex; gap: 5px; margin-top: 5px; }
         .input-row input[type=text] { flex: 1; padding: 4px; font-size: 11px; border: 1px solid #ddd; border-radius: 3px; }
 
-        /* --- 2. 画布与视觉层 --- */
         #canvas-area { flex-grow: 1; position: relative; background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px); background-size: var(--grid-size) var(--grid-size); overflow: hidden; }
         #vignette-container { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; pointer-events: none; z-index: 5; }
         .v-quadrant { width: 100%; height: 100%; }
@@ -56,60 +82,35 @@
         .vq-bl { background: radial-gradient(circle at top right, transparent var(--bl-size), rgba(var(--dark-r), var(--dark-g), var(--dark-b), var(--global-opacity)) calc(var(--bl-size) + var(--bl-blur))); }
         .vq-br { background: radial-gradient(circle at top left, transparent var(--br-size), rgba(var(--dark-r), var(--dark-g), var(--dark-b), var(--global-opacity)) calc(var(--br-size) + var(--br-blur))); }
 
+        /* 象限说明文字位置 */
         .corner-label { position: absolute; color: var(--bg-color); opacity: 0.9; font-weight: bold; pointer-events: none; z-index: 50; }
-        #cl-tl { top: 25px; left: 40px; font-size: var(--tl-fs); }
-        #cl-tr { top: 25px; right: 40px; font-size: var(--tr-fs); text-align: right; }
-        #cl-bl { bottom: 30px; left: 40px; font-size: var(--bl-fs); }
-        #cl-br { bottom: 30px; right: 40px; font-size: var(--br-fs); text-align: right; }
+        #cl-tl { top: 60px; left: 60px; font-size: var(--tl-fs); }
+        #cl-tr { top: 60px; right: 60px; font-size: var(--tr-fs); text-align: right; }
+        #cl-bl { bottom: 60px; left: 60px; font-size: var(--bl-fs); }
+        #cl-br { bottom: 60px; right: 60px; font-size: var(--br-fs); text-align: right; }
 
         #axes-layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 6; display: none; }
         .axis-x { position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: #003366; transform: translateY(-50%); }
         .axis-y { position: absolute; left: 50%; top: 0; height: 100%; width: 2px; background: #003366; transform: translateX(-50%); }
         .arrow { position: absolute; width: 0; height: 0; border: 6px solid transparent; z-index: 7; }
-        .arrow-up { top: -4px; left: 50%; border-bottom: 10px solid #003366; transform: translateX(-50%); }
-        .arrow-down { bottom: -4px; left: 50%; border-top: 10px solid #003366; transform: translateX(-50%); }
-        .arrow-right { right: -4px; top: 50%; border-left: 10px solid #003366; transform: translateY(-50%); }
-        .arrow-left { left: -4px; top: 50%; border-right: 10px solid #003366; transform: translateY(-50%); }
+        .arrow-up { top: -5px; left: 50%; border-bottom: 10px solid #003366; transform: translateX(-50%); }
+        .arrow-down { bottom: -5px; left: 50%; border-top: 10px solid #003366; transform: translateX(-50%); }
+        .arrow-right { right: -5px; top: 50%; border-left: 10px solid #003366; transform: translateY(-50%); }
+        .arrow-left { left: -5px; top: 50%; border-right: 10px solid #003366; transform: translateY(-50%); }
 
         .axis-label { position: absolute; background: #999; padding: 6px 20px; border-radius: 20px; font-size: 16px; font-weight: bold; color: #fff; z-index: 1001; border: 2px solid #fff; outline: none; white-space: nowrap; }
 
-        /* --- 3. 独立文本框系统 (ContentEditable DIV) --- */
         .floating-textbox {
-            position: absolute; 
-            /* 关键：fit-content 让宽度随文字增加，max-content 防止过早换行 */
-            width: fit-content; max-width: 400px; min-width: 100px;
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.25); /* 稍微亮一点 */
-            border: 1px dashed rgba(0,0,0,0.3);
-            border-radius: 6px; 
-            cursor: move; 
-            z-index: 1500; 
-            backdrop-filter: blur(4px);
-            
-            /* 居中核心 */
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
+            position: absolute; width: fit-content; max-width: 400px; min-width: 100px; padding: 8px 12px;
+            background: rgba(255,255,255,0.25); border: 1px dashed rgba(0,0,0,0.3); border-radius: 6px; 
+            cursor: move; z-index: 1500; backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center;
         }
         .floating-textbox:hover { background: rgba(255,255,255,0.5); border-color: #007bff; }
-        
         .editable-content {
-            width: 100%;
-            min-height: 1.2em; /* 确保初始有1行高度 */
-            outline: none;
-            font-size: 16px; color: #003366; font-weight: 500;
-            cursor: text;
-            white-space: pre-wrap; /* 保留换行，同时允许自动换行 */
-            word-break: break-all;
-            line-height: 1.4;
-            text-align: center; /* 文字居中 */
+            width: 100%; min-height: 1.2em; outline: none; color: #003366; font-size: 16px; font-weight: 500; cursor: text;
+            white-space: pre-wrap; word-break: break-all; line-height: 1.4; text-align: center;
         }
-        /* 占位符效果 */
-        .editable-content:empty:before {
-            content: attr(data-placeholder);
-            color: #666; font-weight: normal; font-style: italic;
-        }
-
+        .editable-content:empty:before { content: attr(data-placeholder); color: rgba(0, 51, 102, 0.5); font-weight: normal; font-style: italic; }
         .textbox-delete {
             position: absolute; top: -10px; right: -10px; width: 20px; height: 20px;
             background: #ff4d4d; color: #fff; border-radius: 50%; font-size: 12px;
@@ -117,7 +118,6 @@
         }
         .floating-textbox:hover .textbox-delete { display: flex; }
 
-        /* --- 4. 图标与底部 --- */
         .draggable-item { width: var(--item-size); cursor: grab; position: relative; display: flex; flex-direction: column; align-items: center; transition: transform 0.2s; user-select: none; z-index: 100; }
         .draggable-item.placed { position: absolute; transform: translate(-50%, -50%); }
         .draggable-item.zoomed { transform: translate(-50%, -50%) scale(1.66) !important; }
@@ -133,9 +133,10 @@
 <body>
 
     <div id="toolbar">
-        <button class="btn" onclick="toggleSettings()">⚙️ 背景设置</button>
-        <button class="btn" onclick="toggleAxes()">➕ 显示坐标轴</button>
-        <button class="btn" style="background: #e3f2fd;" onclick="addTextbox()">➕ 添加文本框</button>
+        <button class="btn" id="btn-toggle-settings" onclick="toggleSettings()">⚙️ 背景设置</button>
+        <button class="btn" id="btn-toggle-axes" onclick="toggleAxes()">➕ 显示坐标轴 (关)</button>
+        <button class="btn" id="btn-dark-mode" onclick="toggleDarkMode()">🌙 夜间模式</button>
+        <button class="btn" id="btn-add-textbox" onclick="addTextbox()">➕ 添加文本框</button>
         <div style="flex-grow:1"></div>
         <button class="btn" onclick="resetAll()">🔄 重置画布</button>
     </div>
@@ -155,9 +156,7 @@
                 <input type="number" id="nb-grid" value="40" oninput="syncVal('grid', this.value)">
             </div>
         </div>
-        
         <hr style="border:0; border-top:1px dashed #ddd; margin:10px 0;">
-        
         <div id="quad-controls-container"></div>
     </div>
 
@@ -187,106 +186,10 @@
     </div>
 
     <script>
-        const iconList = [    "犬齿.png",
-    "默汉.png",
-    "劳拉.png",
-    "玛格南.png",
-    "艾米莉亚.png",
-    "强击手.png",
-    "灵媒.png",
-    "康斯坦斯.png",
-    "安妮塔.png",
-    "反冲.png",
-    "银枪.png",
-    "电魔.png",
-    "幽灵克星.png",
-    "库珀.png",
-    "雷娜塔.png",
-    "维奥拉.png",
-    "电光游侠.png",
-    "爱丽儿.png",
-    "瑛美.png",
-    "伊丝梅尔.png",
-    "亨德利.png",
-    "脉冲星.png",
-    "白星.png",
-    "瑛华.png",
-    "噬象者.png",
-    "K先生.png",
-    "信标.png",
-    "空中囚徒.png",
-    "塔拉斯克.png",
-    "奥兹曼.png",
-    "泡沫.png",
-    "夜刃.png",
-    "诺拉.png",
-    "鲁露露.png",
-    "格蕾茜.png",
-    "希尔.png",
-    "唤海人.png",
-    "薇丝帕金.png",
-    "榛果.png",
-    "幻眸.png",
-    "弗洛伦丝.png",
-    "乌拉尼娅.png",
-    "猩红石.png",
-    "噩兆.png",
-    "格琳爱尔.png",
-    "诺瓦克.png",
-    "梅掌柜.png",
-    "波平斯小姐.png",
-    "罪徒.png",
-    "紫罗兰.png",
-    "太空小姐.png",
-    "林芳.png",
-    "铃.png",
-    "伊希丝.png",
-    "投影体λ.png",
-    "小洛伦佐.png",
-    "诺薇尔.png",
-    "玛丽安.png",
-    "斯文顿.png",
-    "莉贝卡.png",
-    "雪莉.png",
-    "谢七.png",
-    "罗泽.png",
-    "荷马先生.png",
-    "贝拉斯科.png",
-    "黑狮子.png",
-    "莱昂内尔.png",
-    "维罗妮卡.png",
-    "德洛丽丝.png",
-    "考官.png",
-    "卡秋莎.png",
-    "灰猎.png",
-    "伊德.png",
-    "爱妮丝.png",
-    "塞壬.png",
-    "麦娅.png",
-    "莱娜.png",
-    "十三号.png",
-    "拉塞尔.png",
-    "罗森菲尔德.png",
-    "香楠.png",
-    "帕斯卡.png",
-    "沃吉特.png",
-    "赤狐.png",
-    "乔伊.png",
-    "夜莺.png",
-    "雷诺.png",
-    "威廉.png",
-    "斯蒂尔.png",
-    "午夜.png",
-    "金塔五号.png",
-    "贾米拉.png",
-    "理查德曼.png",
-    "白金.png",
-    "巡防员奥里斯.png",
-    "巡防员希兰.png",
-    "巡防员加曼.png"];
+        const iconList = ["爱丽儿.png", "投影体λ.png", "K先生.png", "泡沫.png", "强击手.png", "默汉.png", "脉冲星.png", "电魔.png", "玛格南.png", "犬齿.png", "艾米莉亚.png", "劳拉.png", "康斯坦斯.png", "反冲.png", "安妮塔.png", "灵媒.png", "银枪.png", "幽灵克星.png", "库珀.png", "雷娜塔.png", "维奥拉.png", "电光游侠.png", "伊丝梅尔.png", "亨德利.png", "瑛美.png", "白星.png", "瑛华.png", "噬象者.png", "信标.png", "空中囚徒.png", "奥兹曼.png", "塔拉斯克.png", "噩兆.png", "太空小姐.png", "谢七.png", "夜刃.png", "诺拉.png", "鲁露露.png", "格蕾茜.png", "希尔.png", "唤海人.png", "薇丝帕金.png", "榛果.png", "幻眸.png", "弗洛伦丝.png", "乌拉尼娅.png", "猩红石.png", "格琳爱尔.png", "诺瓦克.png", "梅掌柜.png", "波平斯小姐.png", "罪徒.png", "紫罗兰.png", "林芳.png", "铃.png", "伊希丝.png", "诺薇尔.png", "玛丽安.png", "斯文顿.png", "莉贝卡.png", "小洛伦佐.png", "雪莉.png", "罗泽.png", "荷马先生.png", "贝拉斯科.png", "黑狮子.png", "莱昂内尔.png", "维罗妮卡.png", "德洛丽丝.png", "考官.png", "卡秋莎.png", "灰猎.png", "伊德.png", "爱妮丝.png", "塞壬.png", "麦娅.png", "莱娜.png", "十三号.png", "拉塞尔.png", "罗森菲尔德.png", "香楠.png", "帕斯卡.png", "沃吉特.png", "赤狐.png", "乔伊.png", "夜莺.png", "雷诺.png", "威廉.png", "斯蒂尔.png", "午夜.png", "金塔五号.png", "贾米拉.png", "理查德曼.png", "白金.png", "巡防员奥里斯.png", "巡防员希兰.png", "巡防员加曼.png"]; 
+
         let draggedItem = null, maxZIndex = 2000;
 
-        // --- 1. 初始化 (字号范围 1-100) ---
         function initSettings() {
             const container = document.getElementById('quad-controls-container');
             const quads = [['tl','左上'],['tr','右上'],['bl','左下'],['br','右下']];
@@ -316,10 +219,9 @@
 
         function syncVal(key, val) {
             const rg = document.getElementById('rg-' + key);
-            const nb = document.getElementById('nb-' + nbKey(key));
+            const nb = document.getElementById('nb-' + key);
             if (rg) rg.value = val;
             if (nb) nb.value = val;
-
             if (key === 'opacity') document.documentElement.style.setProperty('--global-opacity', val);
             else if (key === 'grid') document.documentElement.style.setProperty('--grid-size', val + 'px');
             else {
@@ -328,34 +230,37 @@
                 document.documentElement.style.setProperty(`--${q}-${type}`, val + unit);
             }
         }
-        function nbKey(key) { return key; }
 
-        // --- 3. 插件：ContentEditable 文本框 ---
+        function toggleDarkMode() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            const btn = document.getElementById('btn-dark-mode');
+            btn.innerHTML = isDark ? "☀️ 日间模式" : "🌙 夜间模式";
+            // 移除了 btn.classList.add/remove('active')
+        }
+
+        function toggleSettings() {
+            const p = document.getElementById('settings-panel');
+            const show = p.style.display !== 'block';
+            p.style.display = show ? 'block' : 'none';
+            document.getElementById('btn-toggle-settings').classList.toggle('active', show);
+        }
+
         function addTextbox() {
             const div = document.createElement('div');
             div.className = 'floating-textbox';
-            div.style.left = '240px'; div.style.top = '20px';
-            div.innerHTML = `
-                <div class="textbox-delete" onclick="this.parentElement.remove()">×</div>
-                <div class="editable-content" contenteditable="true" data-placeholder="shift+enter换行..."></div>
-            `;
+            div.style.left = '391px'; div.style.top = '20px';
+            div.innerHTML = `<div class="textbox-delete" onclick="this.parentElement.remove()">×</div><div class="editable-content" contenteditable="true" data-placeholder="输入文本..."></div>`;
             document.getElementById('canvas-area').appendChild(div);
             makeDraggable(div);
         }
-        
-        // 独立的拖拽逻辑 (防止 ContentEditable 冲突)
+
         function makeDraggable(el) {
             let offset = [0,0];
             el.onmousedown = (e) => {
-                // 如果点的是输入区域或删除按钮，不触发拖动
                 if(e.target.classList.contains('editable-content') || e.target.classList.contains('textbox-delete')) return;
-                
                 e.preventDefault();
                 offset = [el.offsetLeft - e.clientX, el.offsetTop - e.clientY];
-                
-                // 提升层级
                 el.style.zIndex = ++maxZIndex;
-
                 document.onmousemove = (e) => {
                     el.style.left = (e.clientX + offset[0]) + 'px';
                     el.style.top = (e.clientY + offset[1]) + 'px';
@@ -364,7 +269,6 @@
             };
         }
 
-        // --- 4. 基础逻辑 ---
         function initIcons() {
             const dock = document.getElementById('dock');
             iconList.forEach(filename => {
@@ -378,6 +282,7 @@
                 dock.appendChild(div);
             });
         }
+
         function drop(ev) {
             ev.preventDefault(); if (!draggedItem) return;
             const canvas = document.getElementById('canvas-area'), rect = canvas.getBoundingClientRect();
@@ -387,14 +292,23 @@
             draggedItem.style.top = (ev.clientY - rect.top) + 'px';
             draggedItem = null;
         }
+
         function removeToDock(el) {
             el.classList.remove('placed', 'zoomed'); el.style.left = ''; el.style.top = ''; 
             const dock = document.getElementById('dock'), items = Array.from(dock.children); items.push(el);
             items.sort((a, b) => iconList.indexOf(a.dataset.filename) - iconList.indexOf(b.dataset.filename));
             items.forEach(item => dock.appendChild(item));
         }
-        function toggleSettings() { const p = document.getElementById('settings-panel'); p.style.display = p.style.display==='block'?'none':'block'; }
-        function toggleAxes() { const l = document.getElementById('axes-layer'); l.style.display = l.style.display==='block'?'none':'block'; }
+
+        function toggleAxes() {
+            const l = document.getElementById('axes-layer');
+            const show = l.style.display !== 'block';
+            l.style.display = show ? 'block' : 'none';
+            const btn = document.getElementById('btn-toggle-axes');
+            btn.innerText = show ? "显示坐标轴 (开)" : "显示坐标轴 (关)";
+            // 移除了 btn.classList.toggle('active', show)
+        }
+
         function resetAll() { if(confirm('重置画布？')) location.reload(); }
         function updateText(pos, val) { document.getElementById(`cl-${pos}`).innerText = val; }
         function allowDrop(e) { e.preventDefault(); }
@@ -403,5 +317,4 @@
         window.onload = () => { initSettings(); initIcons(); };
     </script>
 </body>
-
 </html>
